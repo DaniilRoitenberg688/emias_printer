@@ -1,0 +1,26 @@
+services:
+
+  app:
+    build: backend/
+    container_name: users_app
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - backend/config/.env
+    volumes:
+      - .backend/docs:/app/docs
+    network_mode: "host"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./
+          target: /app
+          ignore:
+            - .idea
+            - docs
+
+networks:
+  go_network:
+    driver: bridge
+
+
