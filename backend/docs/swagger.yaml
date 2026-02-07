@@ -1,0 +1,69 @@
+definitions:
+  handlers.PrintRequest:
+    properties:
+      ip:
+        type: string
+      text:
+        type: string
+    type: object
+  handlers.PrintResponse:
+    properties:
+      result:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Example API
+  title: My API
+  version: "1.0"
+paths:
+  /api/v1/ping:
+    get:
+      description: Возвращает "pong" если сервер работает
+      responses:
+        "200":
+          description: pong
+          schema:
+            type: string
+      summary: Проверка доступности сервера
+      tags:
+      - Ping
+  /api/v1/printer/find:
+    get:
+      description: Возвращает ip принтера
+      responses:
+        "200":
+          description: ip
+          schema:
+            type: string
+      summary: Находит ip принтера
+      tags:
+      - Printer
+  /api/v1/printer/print:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет текст на принтер
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.PrintRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PrintResponse'
+      summary: Отправляет текст на принтер
+      tags:
+      - Printer
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
