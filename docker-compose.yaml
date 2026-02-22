@@ -1,8 +1,7 @@
 services:
-
-  app:
+  backend:
     build: backend/
-    container_name: users_app
+    container_name: emias_printer_backend
     ports:
       - "${PORT}:${PORT}"
     env_file:
@@ -19,8 +18,30 @@ services:
             - .idea
             - docs
 
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: emias_printer_frontend
+    # env_file: ./frontend/.env
+    ports:
+      - "127.0.0.1:5252:8080"
+    depends_on:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - action: rebuild
+          path: frontend
+          ignore:
+            - node_modules
+            - .idea
+    network_mode: "host"
+
 networks:
-  go_network:
+  emias_printer:
     driver: bridge
-
-

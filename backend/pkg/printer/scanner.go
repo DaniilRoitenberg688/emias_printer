@@ -3,6 +3,7 @@ package printer
 import (
 	"fmt"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -28,6 +29,7 @@ func NewPrinterManipulator(delay int) *PrinterManipulator {
 func (p *PrinterManipulator) Scan() ([]string, error) {
 	ifaces, _ := net.Interfaces()
 	var results []string
+	var wg sync.WaitGroup
 	for _, iface := range ifaces {
 		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
 			continue
@@ -40,7 +42,6 @@ func (p *PrinterManipulator) Scan() ([]string, error) {
 		if err != nil {
 			return nil, NoPrinterFound
 		}
-
 		for _, addr := range addrs {
 			ipNet, ok := addr.(*net.IPNet)
 			if !ok || ipNet.IP.To4() == nil {
@@ -49,13 +50,16 @@ func (p *PrinterManipulator) Scan() ([]string, error) {
 
 			ips, _, _ := hosts(ipNet.String())
 			for _, ip := range ips {
-				ok := checkPort9100(ip, p.PingDelay)
-				if ok {
-					results = append(results, ip)
-				}
+				wg.Go(func() {
+					ok := checkPort9100(ip, p.PingDelay)
+					if ok {
+						results = append(results, ip)
+					}
+				})
 			}
 		}
 	}
+	wg.Wait()
 
 	if len(results) == 0 {
 		return nil, NoPrinterFound
@@ -65,11 +69,21 @@ func (p *PrinterManipulator) Scan() ([]string, error) {
 
 func (p *PrinterManipulator) SendRequest(text string, ip string, port int) error {
 	address := fmt.Sprintf("%v:%v", ip, port)
-	conn, err := net.DialTimeout("tcp", address, time.Duration(p.PingDelay)*time.Second)
+	fmt.Println(address)
+	conn, err := net.DialTimeout("tcp", address, time.Duration(p.PingDelay)*time.Millisecond)
 	if err != nil {
 		return CannotConnectToPrinter
 	}
 	defer conn.Close()
 	_, err = conn.Write([]byte(text))
 	return err
+}
+
+func (p *PrinterManipulator) CheckPrinterIp(ip string) bool {
+	conn, err := net.DialTimeout("tcp", ip+":9100", time.Duration(p.PingDelay)*time.Millisecond)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
 }

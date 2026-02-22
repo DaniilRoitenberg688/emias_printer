@@ -32,6 +32,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/printer/check": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Printer"
+                ],
+                "summary": "проверяет доступен ли принтер",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CheckPrinterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CheckPrinterResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/printer/find": {
             "get": {
                 "description": "Возвращает ip принтера",
@@ -85,6 +118,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.CheckPrinterRequest": {
+            "type": "object",
+            "properties": {
+                "ip": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CheckPrinterResponse": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "boolean"
+                },
+                "ip": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.PrintRequest": {
             "type": "object",
             "properties": {

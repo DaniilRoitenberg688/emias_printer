@@ -1,4 +1,16 @@
 definitions:
+  handlers.CheckPrinterRequest:
+    properties:
+      ip:
+        type: string
+    type: object
+  handlers.CheckPrinterResponse:
+    properties:
+      available:
+        type: boolean
+      ip:
+        type: string
+    type: object
   handlers.PrintRequest:
     properties:
       ip:
@@ -28,6 +40,27 @@ paths:
       summary: Проверка доступности сервера
       tags:
       - Ping
+  /api/v1/printer/check:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CheckPrinterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CheckPrinterResponse'
+      summary: проверяет доступен ли принтер
+      tags:
+      - Printer
   /api/v1/printer/find:
     get:
       description: Возвращает ip принтера
